@@ -12,7 +12,7 @@ const float OBSTACLE_RADIUS = 20;
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 800;
 const int NUM_OBSTACLES = 40;
-const float SCALE = 10.0f;
+const float SCALE = 1.0f;
 const int GRID_SIZE = 800;
 const int NODE_SIZE = 20;
 
@@ -186,7 +186,7 @@ int main() {
 
     generate_random_points(obstacles, NUM_OBSTACLES);
     sf::CircleShape obstacle_point_shape(3);
-    sf::CircleShape point_shape(15);
+    sf::CircleShape point_shape(5);
     sf::CircleShape obstacle_shape(OBSTACLE_RADIUS);
 
     message.setFillColor(sf::Color::Black);
@@ -204,7 +204,7 @@ int main() {
             if (event.type == sf::Event::MouseButtonPressed && user_points.size() < 2) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     sf::Vector2f user_click = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
-                    if (is_an_obstacle_too_close({user_click}, obstacles) > OBSTACLE_RADIUS + 6) {
+                    if (is_an_obstacle_too_close({user_click}, obstacles) > OBSTACLE_RADIUS + 10) {
                         user_points.emplace_back(user_click);
                         is_user_click_too_close = false;
                         message.setFillColor(sf::Color::Black);
@@ -260,7 +260,7 @@ int main() {
                     window.draw(point_shape);
                 }
                 float total_distance = calculate_distance(user_points[0], user_points[1]);
-                message.setString("Route is set. Distance: " + std::to_string(static_cast<int>(total_distance / SCALE)) + " meters.");
+                message.setString("Route is set. Distance: " + std::to_string(static_cast<int>(total_distance * SCALE)) + " meters.");
             }
         } else if (user_points.size() == 1 && !is_user_click_too_close) {
             message.setString("Select the endpoint.");
