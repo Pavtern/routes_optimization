@@ -14,7 +14,7 @@ const int WINDOW_HEIGHT = 800;
 const int NUM_OBSTACLES = 40;
 const float SCALE = 1.0f;
 const int GRID_SIZE = 800;
-const int NODE_SIZE = 20;
+const int NODE_SIZE = 3;
 
 struct Node {
     int x = 0, y = 0;
