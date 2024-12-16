@@ -19,25 +19,25 @@ const int NODE_SIZE = 3;
 struct Node {
     int x = 0, y = 0;
     float f = 0, g = 0, h = 0.0f;
-    Node* parent = nullptr;
+    Node *parent = nullptr;
 
-    bool operator<(const Node& other) const {
+    bool operator<(const Node &other) const {
         return f > other.f;
     }
 };
 
 std::vector<sf::Vector2f> obstacles;
 
-float calculate_distance(const sf::Vector2f& point1, const sf::Vector2f& point2) {
+float calculate_distance(const sf::Vector2f &point1, const sf::Vector2f &point2) {
     float dx = point2.x - point1.x;
     float dy = point2.y - point1.y;
     return std::sqrt(dx * dx + dy * dy);
 }
 
-float is_an_obstacle_too_close(const std::vector<sf::Vector2f>& route, const std::vector<sf::Vector2f>& obstacles) {
+float is_an_obstacle_too_close(const std::vector<sf::Vector2f> &route, const std::vector<sf::Vector2f> &obstacles) {
     float distance = 1000.f;
-    for (const auto& routePoint : route) {
-        for (const auto& obstacle : obstacles) {
+    for (const auto &routePoint: route) {
+        for (const auto &obstacle: obstacles) {
             float temp_distance = calculate_distance(routePoint, obstacle);
             if (distance > temp_distance) {
                 distance = temp_distance;
@@ -68,7 +68,7 @@ std::vector<sf::Vector2f> calculate_stops(sf::Vector2f a, sf::Vector2f b, float 
     return stops;
 }
 
-std::vector<sf::Vector2f> generate_route(const sf::Vector2f& start, const sf::Vector2f& end) {
+std::vector<sf::Vector2f> generate_route(const sf::Vector2f &start, const sf::Vector2f &end) {
     std::vector<sf::Vector2f> route = calculate_stops(start, end);
     if (is_an_obstacle_too_close(route, obstacles) > OBSTACLE_RADIUS) {
         return route;
@@ -86,7 +86,7 @@ std::vector<sf::Vector2f> generate_route(const sf::Vector2f& start, const sf::Ve
     std::priority_queue<Node> openSet;
     std::vector closedSet(GRID_SIZE / NODE_SIZE, std::vector(GRID_SIZE / NODE_SIZE, false));
 
-    Node startNode = { startX, startY, 0.0f, 0.0f, heuristic(startX, startY), nullptr };
+    Node startNode = {startX, startY, 0.0f, 0.0f, heuristic(startX, startY), nullptr};
     openSet.push(startNode);
 
     while (!openSet.empty()) {
@@ -94,7 +94,7 @@ std::vector<sf::Vector2f> generate_route(const sf::Vector2f& start, const sf::Ve
         openSet.pop();
 
         if (current.x == endX && current.y == endY) {
-            Node* node = &current;
+            Node *node = &current;
             while (node != nullptr) {
                 route.emplace_back(node->x * NODE_SIZE + NODE_SIZE / 2, node->y * NODE_SIZE + NODE_SIZE / 2);
                 node = node->parent;
@@ -108,14 +108,14 @@ std::vector<sf::Vector2f> generate_route(const sf::Vector2f& start, const sf::Ve
         }
         closedSet[current.x][current.y] = true;
 
-        std::vector<std::pair<int, int>> neighbors = {
+        std::vector<std::pair<int, int> > neighbors = {
             {current.x + 1, current.y}, {current.x - 1, current.y},
             {current.x, current.y + 1}, {current.x, current.y - 1},
             {current.x + 1, current.y + 1}, {current.x - 1, current.y - 1},
             {current.x + 1, current.y - 1}, {current.x - 1, current.y + 1}
         };
 
-        for (auto& neighbor : neighbors) {
+        for (auto &neighbor: neighbors) {
             int nx = neighbor.first;
             int ny = neighbor.second;
 
@@ -125,7 +125,7 @@ std::vector<sf::Vector2f> generate_route(const sf::Vector2f& start, const sf::Ve
 
             sf::Vector2f pos(nx * NODE_SIZE + NODE_SIZE / 2, ny * NODE_SIZE + NODE_SIZE / 2);
             bool obstacle = false;
-            for (const auto& obs : obstacles) {
+            for (const auto &obs: obstacles) {
                 if (calculate_distance(pos, obs) < OBSTACLE_RADIUS + 6) {
                     obstacle = true;
                     break;
@@ -139,7 +139,7 @@ std::vector<sf::Vector2f> generate_route(const sf::Vector2f& start, const sf::Ve
             float hCost = heuristic(nx, ny);
             float fCost = gCost + hCost;
 
-            Node neighborNode = { nx, ny, fCost, gCost, hCost, new Node(current) };
+            Node neighborNode = {nx, ny, fCost, gCost, hCost, new Node(current)};
             openSet.push(neighborNode);
         }
     }
@@ -147,7 +147,7 @@ std::vector<sf::Vector2f> generate_route(const sf::Vector2f& start, const sf::Ve
     return route;
 }
 
-void generate_random_points(std::vector<sf::Vector2f>& points, int count) {
+void generate_random_points(std::vector<sf::Vector2f> &points, int count) {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     int width = WINDOW_WIDTH - 200;
     int height = WINDOW_HEIGHT - 250;
@@ -155,7 +155,7 @@ void generate_random_points(std::vector<sf::Vector2f>& points, int count) {
         float x = std::rand() % width + 75;
         float y = std::rand() % height + 50;
         bool too_close = false;
-        for (const auto& obs : obstacles) {
+        for (const auto &obs: obstacles) {
             if (calculate_distance(sf::Vector2f(x, y), obs) < OBSTACLE_RADIUS * 1.75f) {
                 too_close = true;
                 break;
@@ -208,7 +208,6 @@ int main() {
                         user_points.emplace_back(user_click);
                         is_user_click_too_close = false;
                         message.setFillColor(sf::Color::Black);
-
                     } else {
                         message.setString("Obstacle is too close to start or to end point!");
                         message.setFillColor(sf::Color::Red);
@@ -217,26 +216,25 @@ int main() {
                     }
                 }
             }
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::N) {
-                    user_points.clear();
-                    obstacles.clear();
-                    route_points.clear();
-                    generate_random_points(obstacles, NUM_OBSTACLES);
-                    is_user_click_too_close = false;
-                    message.setFillColor(sf::Color::Black);
-                }
+            if (event.key.code == sf::Keyboard::N) {
+                user_points.clear();
+                obstacles.clear();
+                route_points.clear();
+                generate_random_points(obstacles, NUM_OBSTACLES);
+                is_user_click_too_close = false;
+                message.setFillColor(sf::Color::Black);
             }
         }
 
         window.clear(sf::Color::White);
-        for (const auto& point : obstacles) {
+        for (const auto &point: obstacles) {
             obstacle_shape.setPosition(point.x - obstacle_shape.getRadius(), point.y - obstacle_shape.getRadius());
             window.draw(obstacle_shape);
-            obstacle_point_shape.setPosition(point.x - obstacle_point_shape.getRadius(), point.y - obstacle_point_shape.getRadius());
+            obstacle_point_shape.setPosition(point.x - obstacle_point_shape.getRadius(),
+                                             point.y - obstacle_point_shape.getRadius());
             window.draw(obstacle_point_shape);
         }
-        for (const auto& point : user_points) {
+        for (const auto &point: user_points) {
             point_shape.setFillColor(sf::Color::Red);
             point_shape.setPosition(point.x - point_shape.getRadius(), point.y - point_shape.getRadius());
             window.draw(point_shape);
@@ -252,12 +250,13 @@ int main() {
                     sf::Vertex(route_points[i], sf::Color::Blue)
                 };
                 window.draw(line, 2, sf::Lines);
-                for (const auto& point : user_points) {
+                for (const auto &point: user_points) {
                     point_shape.setPosition(point.x - point_shape.getRadius(), point.y - point_shape.getRadius());
                     window.draw(point_shape);
                 }
                 float total_distance = calculate_distance(user_points[0], user_points[1]);
-                message.setString("Route is set. Distance: " + std::to_string(static_cast<int>(total_distance * SCALE)) + " meters.");
+                message.setString(
+                    "Route is set. Distance: " + std::to_string(static_cast<int>(total_distance * SCALE)) + " meters.");
             }
         } else if (user_points.size() == 1 && !is_user_click_too_close) {
             message.setString("Select the endpoint.");
