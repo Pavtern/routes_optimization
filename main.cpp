@@ -226,9 +226,6 @@ int main() {
                     is_user_click_too_close = false;
                     message.setFillColor(sf::Color::Black);
                 }
-                if (event.key.code == sf::Keyboard::R && user_points.size() == 2) {
-                    route_points = generate_route(user_points[0], user_points[1]);
-                }
             }
         }
 
